@@ -1,0 +1,47 @@
+<div th:replace="shared/header"></div>
+<div th:replace="shared/sidebar"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Hotel Name</th>
+                            <th>Address</th>
+                            <th>Phone No.</th>
+                            <th>Website</th>
+                            <th>Stars</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="hotel:${hotels}">
+                            <td th:text="${hotel.name}"></td>
+                            <td th:text="${hotel.address}"></td>
+                            <td th:text="${hotel.phone}"></td>
+                            <td th:text="${hotel.website}"></td>
+                            <td th:text="${hotel.stars}"></td>
+                            <td th:if="${T(com.cibt.hms.core.SecuredController).hasRole('manager')}">
+                                <a th:href="'/rooms?hId=' + ${hotel.id}" class="btn btn-xs btn-primary" id="enter-hotel-btn"></i>View</a>
+                            </td>
+                            <td th:if="${T(com.cibt.hms.core.SecuredController).hasRole('customer')}">
+                                <a th:href="'/bookings/form?hId=' + ${hotel.id}" class="btn btn-xs btn-primary" id="booking-form-btn"></i>View</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="hotel/form-dialog"></div>
+<div th:replace="shared/footer"></div>
+
+<script>
+    $(function () {
+        $(".sidebar-menu").addClass("hidden");
+    });
+
+</script>

@@ -1,0 +1,24 @@
+<table class="table table-bordered" id="user-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Roles</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="record:${records}">
+            <td th:text="${record.email}"></td>
+            <td>
+                <span th:each="role: ${record.roles}">
+                    <label class="label label-default" th:text="${role.name}"></label>
+                </span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    $(function(){
+        $("#user-table").DataTable();
+    })
+</script>

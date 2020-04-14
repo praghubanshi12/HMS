@@ -1,0 +1,38 @@
+<div th:replace="shared/header"></div>
+<div th:replace="shared/sidebar"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-body">
+                <div class="table-block"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="shared/footer"></div>
+
+<script>
+    $(function () {
+        loadTable($uri);
+        $(document).on("click", ".btn-check-out", function () {
+            if (confirm("Are you sure you want to check out??")) {
+                $checkinId = parseInt($(this).attr("rel"));
+                $this = $(this);
+                $.post({
+                    type: "POST",
+                    url: $uri + "/check-out",
+                    data: {
+                        _csrf: $csrf,
+                        id: $checkinId
+                    },
+                    success: function (data) {
+                        if (data) {
+                            $this.removeClass("btn-check-out btn-danger").addClass("btn-info").html("Checked Out");
+                        }
+                    }
+                })
+            }
+        });
+    });
+</script>

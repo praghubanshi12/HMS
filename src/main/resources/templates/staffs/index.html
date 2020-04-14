@@ -1,0 +1,66 @@
+<div th:replace="shared/header"></div>
+<div th:replace="shared/sidebar"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('superadmin')}">
+                    <div th:replace="shared/components/buttons/modal/create"></div>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="table-block"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('superadmin')}">
+    <div th:replace="staffs/form-dialog"></div>
+</div>
+
+<div th:replace="shared/footer"></div>
+
+<script>
+    $(function () {
+        loadTable($uri);
+        $(".add-btn-modal").click(function () {
+            $("#form-dialog input[name=id]").val(0);
+            $("#form-dialog input[name=name]").val('');
+            $("#form-dialog input[name=email]").val('').attr("readonly", false);
+            $("#form-dialog input[name=address]").val('');
+            $("#form-dialog input[name=contactNo]").val('');
+            $("#form-dialog input[name=age]").val('');
+            $("#form-dialog select[name=gender]").val('Male');
+            $("#form-dialog select[name=hotel]").val('1').attr("disabled", false);
+            $("#form-dialog select[name=role]").val('2').change().attr("disabled", false);
+            $("#form-dialog").modal();
+        });
+
+        $(document).on('click', '.edit-btn-modal', function () {
+            $id = $(this).attr("rel");
+            $.ajax({
+                type: "get",
+                url: $uri + "/" + $id + "/json",
+                success: function (data) {
+                    {
+                        $("#form-dialog input[name=id]").val(data.id);
+                        $("#form-dialog input[name=userId]").val(data.userId);
+                        $("#form-dialog input[name=name]").val(data.name);
+                        $("#form-dialog input[name=email]").val(data.email).attr("readonly", true);
+                        $("#form-dialog input[name=address]").val(data.address);
+                        $("#form-dialog input[name=contactNo]").val(data.contactNo);
+                        $("#form-dialog input[name=age]").val(data.age);
+                        $("#form-dialog select[name=gender]").val(data.gender).change();
+                        $("#form-dialog select[name=role]").val(data.role.id).change().attr("disabled", true);
+                        if(data.role.name != "manager"){
+                            $("#form-dialog select[name=hotel]").val(data.hotel.id).change().attr("disabled", true);
+                        }
+                        $("#form-dialog").modal();
+                    }
+                }
+            });
+        });
+    })
+</script>

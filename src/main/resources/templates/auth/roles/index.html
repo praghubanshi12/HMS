@@ -1,0 +1,14 @@
+<div th:replace="shared/header"></div>
+<div th:replace="shared/sidebar"></div>
+
+<div th:replace="shared/components/index-table"></div>
+<div th:replace="auth/roles/form-dialog"></div>
+<div th:replace="shared/footer"></div>
+
+<script>
+    loadTable($uri);
+    $(".add-btn").click(function (e) {
+        e.preventDefault();
+        $("#form-dialog").modal();
+    })
+</script>

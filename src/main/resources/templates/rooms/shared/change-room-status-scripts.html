@@ -1,0 +1,27 @@
+<script>
+    $("#ul-room-status li").click(function () {
+        $id = $(this).attr('rel');
+        $status = $(this).find("a").html();
+        $color = $(this).attr("color");
+        $this = $(this);
+
+        $.ajax({
+            type: "POST",
+            url: $uri + '/change-status',
+            data: {
+                roomId: $id,
+                status: $status,
+                _csrf: $csrf
+            },
+            success: function (data) {
+                if (data) {
+                    $this.parents("div .card").find(".card-text-status").css("color", $color).html($status);
+                    $this.parents("div .card").find(".card-text-room-no").css("color", $color);
+                }
+            },
+            error: function (e) {
+                console.log("ERROR: ", e);
+            }
+        });
+    });
+</script>

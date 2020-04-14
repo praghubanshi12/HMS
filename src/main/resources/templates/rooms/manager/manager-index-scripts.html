@@ -1,0 +1,254 @@
+<script>
+    $(function () {
+        $assignedStaffsId = [];
+        $(".add-btn-modal").click(function () {
+            $("#create-room-dialog input[name=roomNo]").val('');
+            $("#create-room-dialog select[name=type]").val('Normal').change();
+            $("#create-room-dialog select[name=bedType]").val('Single Bed').change();
+            $("#create-room-dialog input[name=smoking]").prop("checked", false);
+            $("#create-room-dialog input[name=balcony]").prop("checked", false);
+            $("#create-room-dialog").modal();
+        });
+
+        $("#create-room-dialog input[name=roomNo]").on("change keyup", function(){
+            $roomNo = $(this).val();
+            $message = $("#room-number-occupied-message");
+            if($roomNo != ""){
+                $.post("/rooms/check-room-number", {
+                    _csrf: $csrf,
+                    roomNo: $roomNo,
+                    hotelId: "[[${hId}]]"
+                }, function(data){
+                    if(data){
+                        $message.removeClass("hidden");
+                    }else{
+                        $message.addClass("hidden");
+                    }
+                });
+            }
+            
+        })
+
+        $("ul li.assign-task-btn").click(function () {
+            $roomId = $(this).attr("rel");
+            $("#form-assign-task-dialog h4.modal-title").html("Assign Task (Room Number: "+ $(this).attr("roomNo") + ")");
+            $("#form-assign-task-dialog input[name=room]").val($roomId);
+            $("#form-assign-task-dialog #select-staff-id").find("option").remove();
+            $assignedStaffsId = [];
+            $("#form-assign-task-dialog #add-room-staff-btn").attr("roomId", $roomId);
+            $selectRoomStaff = $("#form-create-room-staffs-dialog #select-room-staff-id");
+            $selectRoomStaff.find("option").remove();
+
+            //load all hotel staffs in room staff form by default
+            $.ajax({
+                type: "get",
+                url: "/staffs/hotel/[[${hId}]]",
+                success: function (data) {
+                    $.each(data, function (i, row) {
+                        $("<option/>").val(row.id).text(row.name).appendTo($selectRoomStaff);
+                    })
+                }
+            });
+
+            //add only staffs who are assigned in the room in dropdown
+            $.ajax({
+                type: "get",
+                url: "/staffs/room/" + $roomId,
+                success: function (data) {
+                    $.each(data, function (i, row) {
+                        $("<option/>").val(row.id).text(row.name).appendTo("#form-assign-task-dialog #select-staff-id");
+                        $assignedStaffsId.push(row.id);
+                    })
+                }
+            }).then(function () {
+                $("#form-assign-task-dialog").modal();
+            })
+        });
+
+        $("ul li.view-facilities-btn").click(function () {
+            $("li.li-smoking").addClass("hidden");
+            $("li.li-balcony").addClass("hidden");
+            $("li.li-single-bed").addClass("hidden");
+            $("li.li-double-bed").addClass("hidden");
+            
+            $roomId = parseInt($(this).attr("rel"));
+            $("#form-room-facility-dialog h4.modal-title").html("View Facilities (Room Number: "+ $(this).attr("roomNo") + ")");
+            $("#form-room-facility-dialog .add-room-facility-btn-modal").attr("roomId", $(this).attr("rel"));
+            $("#form-room-facility-dialog #ul-room-facility").find("li").remove();
+
+            $.ajax({
+                type: "get",
+                url: "/rooms/" + $roomId + "/json",
+                success: function (data) {
+                    for (var i in data) {
+                        switch (i) {
+                            case 'smoking':
+                                if (data[i]) {
+                                    $("li.li-smoking").removeClass("hidden");
+                                }
+                                break;
+
+                            case 'balcony':
+                                if (data[i]) {
+                                    $("li.li-balcony").removeClass("hidden");
+                                }
+                                break;
+
+                            case 'bedType':
+                                if (data[i] == "Single Bed") {
+                                    $("li.li-single-bed").removeClass("hidden");
+                                }
+
+                                if (data[i] == "Double Bed") {
+                                    $("li.li-double-bed").removeClass("hidden");
+                                }
+                                break;
+                        }
+                    }
+                }
+            });
+
+            $roomFaciltiesId = [];
+            $selectRoomFacilities = $("#form-add-room-facility-dialog #select-room-facility-id");
+            $selectRoomFacilities.find("option").remove();
+
+            //load all hotel facilities in room facility form by default
+            $.ajax({
+                type: "get",
+                url: "/facilities/hotel/[[${hId}]]",
+                success: function (data) {
+                    $.each(data, function (i, row) {
+                        $("<option/>").val(row.id).text(row.name).appendTo($selectRoomFacilities);
+                    })
+                }
+            });
+
+            //add only facilities which are assigned in the room in list
+            $.ajax({
+                type: "get",
+                url: "/facilities/room/" + $roomId,
+                success: function (data) {
+                    $.each(data, function (i, row) {
+                        $("#form-room-facility-dialog #ul-room-facility").append("<li><span class='col-md-6'>" + row.name + "</span></li>");
+                        $roomFaciltiesId.push(row.id);
+                    })
+                }
+            }).then(function () {
+                $("#form-room-facility-dialog").modal();
+            })
+
+
+        });
+
+        $("#form-assign-task-dialog #add-task-btn").click(function () {
+            $("#form-create-task-dialog input[name=name]").val('');
+            $("#form-create-task-dialog").modal();
+        });
+
+        $("#form-assign-task-dialog #add-room-staff-btn").click(function () {
+            $("#form-create-room-staffs-dialog input[name=room]").val($(this).attr("roomId"));
+            //if staff already assigned in room, dont show in assign new staff form
+            $("#form-create-room-staffs-dialog #select-room-staff-id").find("option").each(function () {
+                if ($assignedStaffsId.indexOf(parseInt($(this).val())) > -1) {
+                    $(this).remove();
+                }
+            });
+            $("#form-create-room-staffs-dialog").modal();
+        });
+
+        $("#form-create-task-dialog #task-form").submit(function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "/tasks/save-json",
+                data: $(this).serialize(),
+                success: function (data) {
+                    if (data) {
+                        $option = $("<option/>");
+                        $option.val(data.id).text(data.name);
+                        $("#form-assign-task-dialog #select-task-id").append($option).val(data.id).change();
+                        $("#form-create-task-dialog").modal("hide");
+                    }
+                },
+                error: function (e) {
+                    console.log("ERROR: ", e);
+                }
+            });
+        });
+
+        $("#form-create-room-staffs-dialog #room-staffs-form").submit(function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "/staffs/assign-room",
+                data: $(this).serialize(),
+                success: function (data) {
+                    if (data) {
+                        $option = $("<option/>");
+                        $option.val(data.id).text(data.name);
+                        $("#form-assign-task-dialog #select-staff-id").append($option).val(data.id).change();
+                        $assignedStaffsId.push(data.id);
+                        $("#form-create-room-staffs-dialog").modal("hide");
+                    }
+                },
+                error: function (e) {
+                    console.log("ERROR: ", e);
+                }
+            });
+        });
+
+
+
+        $("#form-room-facility-dialog .add-room-facility-btn-modal").click(function () {
+            $("#form-add-room-facility-dialog input[name=room]").val($(this).attr("roomId"));
+            $("#form-add-room-facility-dialog input[name=status]").prop("checked", false);
+            //if staff already assigned in room, dont show in assign new staff form
+            $("#form-add-room-facility-dialog #select-room-facility-id").find("option").each(function () {
+                if ($roomFaciltiesId.indexOf(parseInt($(this).val())) > -1) {
+                    $(this).remove();
+                }
+            });
+            $("#form-add-room-facility-dialog").modal();
+        });
+
+        $("#form-add-room-facility-dialog .create-facility-btn-modal").click(function () {
+            $("#form-create-facility-dialog input[name=name]").val("");
+            $("#form-create-facility-dialog").modal();
+        });
+
+        $("#form-add-room-facility-dialog #room-facility-form").submit(function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "/facilities/room/save",
+                data: $(this).serialize(),
+                success: function (data) {
+                    $("#form-room-facility-dialog #ul-room-facility").append("<li><span class='col-md-6'>" + data.facility.name + "</span></li>");
+                    $roomFaciltiesId.push(data.facility.id);
+                    $("#form-add-room-facility-dialog").modal("hide");
+                },
+                error: function (e) {
+                    console.log("ERROR: ", e);
+                }
+            })
+        });
+
+        $("#form-create-facility-dialog #facility-form").submit(function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "/facilities/save-json",
+                data: $(this).serialize(),
+                success: function (data) {
+                    $("#form-create-facility-dialog").modal("hide");
+                    $option = $("<option/>").val(data.id).text(data.name);
+                    $("#form-add-room-facility-dialog #select-room-facility-id").append($option).val(data.id).change();
+                },
+                error: function (e) {
+                    console.log("ERROR: ", e);
+                }
+            });
+        });
+
+    })
+</script>

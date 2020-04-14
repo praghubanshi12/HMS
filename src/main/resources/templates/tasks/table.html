@@ -1,0 +1,24 @@
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Task</th>
+            <th>Task Details</th>
+            <th>Room Number</th>
+            <th>Assigned To</th>
+            <th>Priority</th>
+            <th>Occurrence</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="record:${records}">
+            <td th:text="${record.task.name}"></td>
+            <td th:text="${record.description}"></td>
+            <td th:text="${record.room.roomNo}"></td>
+            <td th:text="${record.staff.name}"></td>
+            <td th:text="${record.priority}"></td>
+            <td th:text="${record.occurrence}"></td>
+            <td><span th:class="'label label-' + ${record.status.color}" th:text="${record.status.name}"></span></td>
+        </tr>
+    </tbody>
+</table>

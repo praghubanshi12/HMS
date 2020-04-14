@@ -1,0 +1,24 @@
+<div class="modal fade" id="form-room-facility-dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header with-border">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">View Facilities</h4>
+            </div>
+            <a class="btn btn-sm btn-primary add-room-facility-btn-modal" roomId="0" href="javascript:void(0)"><i
+                    class="fa fa-plus"></i> Add</a>
+            <ul>
+                <li class="hidden li-smoking"><span class="col-md-6">Smoking</span></li>
+                <li class="hidden li-balcony"><span class="col-md-6">Balcony</span></li>
+                <li class="hidden li-single-bed"><span class="col-md-6">Single Bed</span></li>
+                <li class="hidden li-double-bed"><span class="col-md-6">Double Bed</span></li>
+            </ul>
+
+            <ul id="ul-room-facility"></ul>
+        </div>
+    </div>
+</div>
+
+<div th:replace="rooms/manager/facility-modal/add-room-facility-dialog"></div>

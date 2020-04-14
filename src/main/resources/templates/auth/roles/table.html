@@ -1,0 +1,22 @@
+<table class="table table-bordered" id="role-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="record:${records}">
+            <td th:text="${record.name}"></td>
+            <td>
+                <span th:replace="shared/components/buttons/edit"></span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    $(function(){
+        $("#role-table").DataTable();
+    })
+</script>

@@ -1,0 +1,47 @@
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Contact No.</th>
+            <th>Email</th>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>Role</th>
+            <th th:if="${T(com.cibt.hms.core.SecuredController).hasRole('superadmin')}">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="record:${records}">
+            <td th:text="${record.name}"></td>
+            <td th:text="${record.address}"></td>
+            <td th:text="${record.contactNo}"></td>
+            <td th:text="${record.email}"></td>
+            <td th:text="${record.age}"></td>
+            <td th:text="${record.gender}"></td>
+            <td th:text="${record.role.name}"></td>
+            <td th:if="${T(com.cibt.hms.core.SecuredController).hasRole('superadmin')}"> 
+                <a th:if="${record.userId>0}" href="javascript:void(0)" th:rel="${record.id}"
+                    class="btn btn-xs btn-default"><i class="fa fa-key text-success"></i><label
+                        class="text-success">Access Granted</label> </a>
+                <a th:unless="${record.userId>0}" href="javascript:void(0)" th:rel="${record.id}"
+                    class="btn btn-xs btn-default grant-access-btn"><i class="fa fa-key"></i> Grant Access</a>
+                <span th:replace="shared/components/buttons/modal/edit"></span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    $(function () {
+        $(document).on("click", ".grant-access-btn", function () {
+            $this = $(this);
+            id = $(this).attr("rel");
+            $.post($uri + "/grant-access", { id: id, _csrf: $csrf }, function (data) {
+                if (data) {
+                    $this.html("Access Granted").addClass("label-success");
+                }
+            })
+        })
+    })
+</script>

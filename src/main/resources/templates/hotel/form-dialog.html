@@ -1,0 +1,62 @@
+<div class="modal fade" id="form-dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header with-border">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Create a new Staff</h4>
+            </div>
+            <form th:action="${pageURI} + '/save'" method="post">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-6 form-group">
+                                <label>Name</label>
+                                <input type="text" name="name" class="form-control">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Address</label>
+                                <input type="text" name="address" class="form-control">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Phone Number</label>
+                                <input type="text" name="phone" class="form-control">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Website</label>
+                                <input type="text" name="website" class="form-control">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Manager</label>
+                                <select name="manager">
+                                    <option th:value="${manager.id}" th:text="${manager.name}" th:each="manager:${managers}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Longitude</label>
+                                <input type="text" name="longitude" class="form-control">
+                            </div>
+
+                            <div class="col-md-6 form-group">
+                                <label>Latitude</label>
+                                <input type="text" name="latitude" class="form-control">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Stars</label>
+                                <input type="number" name="stars" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="id" value="0">
+                    <input type="hidden" name="userId" value="0">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

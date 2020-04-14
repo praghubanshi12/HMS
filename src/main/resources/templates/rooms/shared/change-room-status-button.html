@@ -1,0 +1,17 @@
+<div class="btn-group pull-right">
+    <button type="button" style="background-color: #F3C49D;" class="btn btn-default dropdown-toggle pull-right" data-toggle="dropdown">
+        <span class="caret"></span>
+    </button>
+
+    <ul id='ul-room-status' class="dropdown-menu" role="menu">
+        <li color="green" th:rel="${room.id}">
+            <a href="javascript:void(0)">Clean</a>
+        </li>
+        <li color="brown" th:rel="${room.id}">
+            <a href="javascript:void(0)">Dirty</a>
+        </li>
+        <li color="red" th:rel="${room.id}">
+            <a href="javascript:void(0)">Maintenance</a>
+        </li>
+    </ul>
+</div>

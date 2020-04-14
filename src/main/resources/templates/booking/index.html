@@ -1,0 +1,54 @@
+<div th:replace="shared/header"></div>
+<div th:replace="shared/sidebar"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-body">
+                <div class="table-block"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="shared/footer"></div>
+
+<script>
+    $(function () {
+        loadTable($uri);
+        $(document).on("click", ".btn-view-matching-rooms", function(){
+            $matchingRoomIds = [];
+            $bookingId = parseInt($(this).parent().attr("rel"));
+            $.ajax({
+                type:"GET",
+                url: "/rooms/matching/booking/"+ $bookingId,
+                success: function(data){
+                    $.each(data,function(i,row){
+                        $matchingRoomIds.push(row.id);
+                    })
+                }
+            }).then(function(){
+                window.location.href = "/rooms?hId=[[${hId}]]&roomIds="+$matchingRoomIds + "&bookingId="+ $bookingId;
+            })
+        });
+
+        $(document).on("click", ".btn-cancel-booking", function(){
+            $bookingId = parseInt($(this).parent().attr("rel"));
+            $this = $(this);
+            $.ajax({
+                type:"POST",
+                url: "/bookings/cancel",
+                data:{
+                    _csrf: $csrf,
+                    bookingId: $bookingId
+                },
+                success: function(data){
+                    if(data){
+                        $this.parents("tr").find(".td-booking-status").find("div").remove(); 
+                        $this.parents("tr").find(".td-booking-status").append($("<span/>").addClass("label label-danger").html("Cancelled"));
+                        $this.parent().find("a").remove();
+                    }
+                }
+            });
+        });
+    });
+</script>

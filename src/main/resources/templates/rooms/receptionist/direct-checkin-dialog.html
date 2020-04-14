@@ -1,0 +1,42 @@
+<div class="modal fade" id="form-assign-task-dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header with-border">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Check In</h4>
+            </div>
+
+            <form action="/checkins/direct/save" method="post">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-6 form-group">
+                                <label>Customer</label>
+                                <div class="input-group">
+                                    <select id="select-customer-id" name="customer" style="width:100%;">
+                                        <option th:value="${customer.id}" th:text="${customer.name}"
+                                            th:each="customer: ${customers}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>No. of people</label>
+                                <input class="form-control" type="number" min="1" max="7" name="noOfPeople" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="id" value="0">
+                    <input type="hidden" name="room" value="0">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Room</th>
+            <th>No. of people</th>
+            <th>Checked In Date</th>
+            <th th:if="${T(com.cibt.hms.core.SecuredController).hasRole('manager')}">Checked Out Date</th>
+            <th>Booking?</th>
+            <th th:if="${T(com.cibt.hms.core.SecuredController).hasRole('receptionist')}">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="record:${records}">
+            <td th:text="${record.customer.name}"></td>
+            <td th:text="${record.room.roomNo}"></td>
+            <td th:text="${record.noOfPeople}"></td>
+            <td th:text="${#dates.format(record.checkinDate, 'dd-MMM-yyyy HH:mm')}"></td>
+            <td th:if="${T(com.cibt.hms.core.SecuredController).hasRole('manager')}">
+                <span th:if="${record.checkoutDate} != null" th:text="${#dates.format(record.checkoutDate, 'dd-MMM-yyyy HH:mm')}"></span>
+            </td>
+            <td>
+                <input type="checkbox" th:checked="${record.booking} != null" disabled>
+            </td>
+            <td th:if="${T(com.cibt.hms.core.SecuredController).hasRole('receptionist')}">
+                <a class="btn btn-xs btn-danger btn-check-out" th:rel="${record.id}">Check Out</a>
+            </td>
+        </tr>
+    </tbody>
+</table>

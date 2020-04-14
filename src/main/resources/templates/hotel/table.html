@@ -1,0 +1,24 @@
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Hotel Name</th>
+            <th>Address</th>
+            <th>Phone No.</th>
+            <th>Website</th>
+            <th>Stars</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="record:${records}">
+            <td th:text="${record.name}"></td>
+            <td th:text="${record.address}"></td>
+            <td th:text="${record.phone}"></td>
+            <td th:text="${record.website}"></td>
+            <td th:text="${record.stars}"></td>
+            <td th:if="${T(com.cibt.hms.core.SecuredController).hasRole('superadmin')}">
+                <span th:replace="shared/components/buttons/modal/edit"></span>
+            </td>
+        </tr>
+    </tbody>
+</table>

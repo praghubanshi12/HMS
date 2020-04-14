@@ -1,0 +1,41 @@
+<script>
+    $(function () {
+        $("ul li.view-room-tasks-btn").click(function () {
+            $roomId = $(this).attr("rel");
+            $staffId = "[[${staffId}]]";
+            $("#form-check-room-tasks-dialog h4.modal-title").html("Check Completed Tasks (Room Number: "+ $(this).attr("roomNo") + ")");
+            $("#form-check-room-tasks-dialog #check-room-tasks-table tbody")
+            $tbody = $("#form-check-room-tasks-dialog #check-room-tasks-table tbody");
+            $tbody.find("tr").remove();
+
+            $.ajax({
+                type: "get",
+                url: "/tasks/room/" + $roomId + "/staff/" + $staffId,
+                success: function (data) {
+                    $.each(data, function (i, row) {
+                        if (row.status.name == "Pending") {
+                            let $tr = $("<tr/>").attr("roomTaskId", row.id);
+                            $("<td/>").html(row.task.name).appendTo($tr);
+                            $("<td/>").html(row.description).appendTo($tr);
+                            $("<td/>").html(row.priority).appendTo($tr);
+                            $("<td/>").css("text-align", "center").html("<input class='room-task-checkbox' type='checkbox'>").appendTo($tr);
+                            $tbody.append($tr);
+                        }
+                    })
+                }
+            }).then(function () {
+                $("#form-check-room-tasks-dialog").modal();
+            });
+        });
+
+        $(document).on("click", ".room-task-checkbox", function () {
+            $isChecked = $(this).prop("checked");
+            $roomTaskId = $(this).parents("tr").attr("roomTaskId");
+            $.post("/tasks/check", { isChecked: $isChecked, id: $roomTaskId, _csrf: $csrf }, function (data) {
+                if (data) {
+                    alert("Action completed sucessfully!!");
+                }
+            })
+        })
+    });
+</script>

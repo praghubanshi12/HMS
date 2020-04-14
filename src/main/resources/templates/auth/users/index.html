@@ -1,0 +1,22 @@
+<div th:replace="shared/header"></div>
+<div th:replace="shared/sidebar"></div>
+
+<div th:replace="shared/components/index-table"></div>
+<div th:replace="auth/users/form-dialog"></div>
+<div th:replace="shared/footer"></div>
+
+<script>
+    $(function () {
+        loadTable($uri);
+        $(".add-btn").click(function(e){
+            e.preventDefault();
+            $("#form-dialog input[name=email]").val('');
+            $("#form-dialog input[name=password]").val('');
+            $("#form-dialog").modal();
+        })
+
+        $("select").select2({
+            theme: 'bootstrap'
+        });
+    })
+</script>

@@ -1,0 +1,56 @@
+<div th:replace="shared/header"></div>
+<div th:replace="shared/sidebar"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <div th:replace="shared/components/buttons/modal/create"></div>
+            </div>
+            <div class="box-body">
+                <div class="table-block"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="hotel/form-dialog"></div>
+<div th:replace="shared/footer"></div>
+
+<script>
+    $(function () {
+        loadTable($uri);
+        $(".add-btn-modal").click(function () {
+            $("#form-dialog input[name=name]").val('');
+            $("#form-dialog input[name=phone]").val('');
+            $("#form-dialog input[name=address]").val('');
+            $("#form-dialog input[name=website]").val('');
+            $("#form-dialog input[name=longitude]").val('');
+            $("#form-dialog input[name=latitude]").val('');
+            $("#form-dialog input[name=stars]").val('');
+            $("#form-dialog").modal();
+        });
+        
+        $(document).on('click', '.edit-btn-modal', function () {
+            $id = $(this).attr("rel");
+            $.ajax({
+                type: "get",
+                url: $uri + "/" + $id + "/json",
+                success: function (data) {
+                    {
+                        $("#form-dialog input[name=id]").val(data.id);
+                        $("#form-dialog input[name=name]").val(data.name);
+                        $("#form-dialog input[name=phone]").val(data.phone);
+                        $("#form-dialog input[name=address]").val(data.address);
+                        $("#form-dialog input[name=website]").val(data.website);
+                        $("#form-dialog input[name=longitude]").val(data.longitude);
+                        $("#form-dialog input[name=latitude]").val(data.latitude);
+                        $("#form-dialog input[name=stars]").val(data.stars);
+                        $("#form-dialog select[name=manager]").val(data.manager.id).change();
+                        $("#form-dialog").modal();
+                    }
+                }
+            });
+        });
+    })
+
+</script>

@@ -1,0 +1,198 @@
+<div th:replace="shared/header"></div>
+<div th:replace="shared/sidebar"></div>
+
+<div class="box">
+    <div class="box-body">
+        <form id="booking-form">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-4">
+                        <label>Number of People: </label>
+                        <input style="width:50%" name="noOfPeople" class="form-control" type="text" id="no-of-people">
+                    </div>
+
+                    <div style="width:25%" class="input-group date col-md-4">
+                        <label>Date:</label>
+                        <div class="input-group">
+                            <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                            <input type="text" class="form-control pull-right"
+                                placeholder="Click to select booking date range" id="booking-date-range" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-12">
+                        <h3>Select Room Type:</h3>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Normal
+                            <input type="checkbox" id="normal-checkbox" checked>
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Suite
+                            <input type="checkbox" id="suite-checkbox">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-2">
+                        <label>Single Bed
+                            <input type="checkbox" id="single-bed-checkbox" checked>
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Double Bed
+                            <input type="checkbox" id="double-bed-checkbox">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-2">
+                        <label>Smoking
+                            <input type="checkbox" id="smoking-checkbox">
+                        </label>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Balcony
+                            <input type="checkbox" id="balcony-checkbox">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-12">
+                        <h3>Select Facilities</h3>
+                    </div>
+                    <div class="facility-checkboxes">
+                        <div class="facility-checkboxes">
+                            <div th:each="facility: ${facilities}" class="col-xs-2">
+                                <label th:text="${facility.name}">
+                                </label>
+                                <input type="checkbox" class="facility-checkbox" th:rel="${facility.id}">
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="customer" th:value="${cId}">
+                    <input type="hidden" name="hotel" th:value="${hId}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="col-md-4" style="margin: 10px 0px;">
+                        <button type="submit" id="btn-submit-booking-details"
+                            class="btn btn-primary pull-left">Book</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="shared/footer"></div>
+
+<script>
+    $(function () {
+        var bookingStartDate;
+        var bookingEndDate;
+        $selectedFacilities = [];
+        //Date range picker
+        $('#booking-date-range').daterangepicker({
+            autoUpdateInput: false,
+            locale: {
+                format: '/YYYY',
+                cancelLabel: 'Clear'
+            },
+            minDate: new Date()
+        }, function (start, end) {
+            bookingStartDate = start.format('DD-MM-YYYY'),
+                bookingEndDate = end.format('DD-MM-YYYY')
+        });
+
+        $('#booking-date-range').on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(picker.startDate.format('DD-MM-YYYY') + ' - ' + picker.endDate.format('DD-MM-YYYY'));
+        });
+
+        $("#booking-form").submit(function (e) {
+            e.preventDefault();
+            var data = $(this).serializeArray();
+            $roomType = $("#suite-checkbox").prop("checked") ? "Suite" : "Normal";
+            $bedType = $("#single-bed-checkbox").prop("checked") ? "Single Bed" : "Double Bed";
+
+
+            data.push({ name: "bookingStartDate", value: bookingStartDate},
+                { name: "bookingEndDate", value: bookingEndDate},
+                { name: "facilityIds", value: $selectedFacilities },
+                { name: "roomType", value: $roomType },
+                { name: "bedType", value: $bedType },
+                { name: "isSmoking", value: $("#smoking-checkbox").prop("checked") },
+                { name: "isBalcony", value: $("#balcony-checkbox").prop("checked") }
+            );
+
+            $.ajax({
+                type: "POST",
+                url: $uri + "/create",
+                traditional: true,
+                data: data,
+                success:function(data){
+                    if(data!= null){
+                        window.location.href = "/rooms?hId=[[${hId}]]&roomIds="+ data;
+                    }else{
+                        alert("No matching rooms found");
+                    }
+                }
+            });
+        });
+
+        $("#suite-checkbox").change(function(){
+            if($(this).prop("checked")){
+                $("#normal-checkbox").prop("checked", false);
+            }else{
+                $("#normal-checkbox").prop("checked", true);
+            }
+        });
+
+        $("#normal-checkbox").change(function(){
+            if($(this).prop("checked")){
+                $("#suite-checkbox").prop("checked", false);
+            }else{
+                $("#suite-checkbox").prop("checked", true);
+            }
+        });
+
+        $("#single-bed-checkbox").change(function(){
+            if($(this).prop("checked")){
+                $("#double-bed-checkbox").prop("checked", false);
+            }else{
+                $("#double-bed-checkbox").prop("checked", true);
+            }
+        });
+
+        $("#double-bed-checkbox").change(function(){
+            if($(this).prop("checked")){
+                $("#single-bed-checkbox").prop("checked", false);
+            }else{
+                $("#single-bed-checkbox").prop("checked", true);
+            }
+        });
+
+        $(".facility-checkbox").change(function () {
+            if ($(this).prop("checked")) {
+                $selectedFacilities.push($(this).attr("rel"));
+            } else {
+                $selectedFacilities.splice($selectedFacilities.indexOf($(this).attr("rel"), 1));
+            }
+        });
+    });
+</script>

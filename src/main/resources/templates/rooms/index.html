@@ -1,0 +1,254 @@
+<div th:replace="shared/header"></div>
+<div th:replace="shared/sidebar"></div>
+
+<style>
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        margin: auto;
+        background-color: #F7F3EF;
+        text-align: center;
+        border-radius: 40px;
+        height: 280px;
+        width: 210px;
+        margin-top: 20px;
+    }
+</style>
+
+<div th:replace="rooms/manager/create-room-dialog"></div>
+
+<div class="box">
+    <div class="box-header">
+        <div class="row" style="margin:auto">
+            <div class="col-md-3">
+                <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('manager')}">
+                    <div th:replace="shared/components/buttons/modal/create"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="box-body">
+        <div class="row">
+            <div th:each="room:${rooms}" class="col-md-3">
+                <div class="card clickable" th:rel="${room.id}">
+                    <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('manager')}">
+                        <div th:replace="rooms/manager/menu-button"></div>
+                    </div>
+
+                    <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('staff')}">
+                        <div th:replace="rooms/staff/menu-button"></div>
+                    </div>
+
+                    <div th:unless="${T(com.cibt.hms.core.SecuredController).hasRole('customer', 'receptionist')}">
+                        <div th:replace="rooms/shared/change-room-status-button"></div>
+                    </div>
+
+                    <h4>
+                        <span class="label label-default" th:if="${room.type}=='Normal'" th:text="${room.type}"></span>
+                        <span class="label label-info" th:if="${room.type}=='Suite'" th:text="${room.type}"></span>
+                    </h4>
+
+                    <div th:unless="${T(com.cibt.hms.core.SecuredController).hasRole('customer')}"
+                        style="padding-top: 30px;">
+                        <h2 class="card-text-status" th:style="'color:' + ${room.status.color}"
+                            th:text="${room.status.name}"></h2>
+
+                        <h1 class="card-text-room-no" th:id="${room.id}" th:text="${room.roomNo}"
+                            th:style="'color:' + ${room.status.color} "></h1>
+                    </div>
+
+                    <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('customer')}">
+                        <div style="padding-top: 30px;">
+                            <h2>Room No</h2>
+                            <h2 class="card-text-room-no" th:id="${room.id}" th:text="${room.roomNo}"></h2>
+                            <h4><span class="label label-success">Available</span></h4>
+                        </div>
+                    </div>
+                    <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('receptionist')}">
+                        <h4 th:if="${room.checked}"><span class="label label-danger">Checked</span></h4>
+                        <button th:unless="${room.checked}" class="btn btn-success btn-check-in-room-direct">Check
+                            In</button>
+                    </div>
+                </div>
+            </div>
+
+            <div th:unless="${currentlyBookedRooms == null} ">
+                <div th:each="currentlyBookedRoom:${currentlyBookedRooms}" class="col-md-3">
+                    <div class="card clickable" th:rel="${currentlyBookedRoom.id}">
+                        <h4>
+                            <span class="label label-default" th:if="${currentlyBookedRoom.type}=='Normal'"
+                                th:text="${currentlyBookedRoom.type}"></span>
+                            <span class="label label-info" th:if="${currentlyBookedRoom.type}=='Suite'"
+                                th:text="${currentlyBookedRoom.type}"></span>
+                        </h4>
+                        <div style="padding-top: 30px;">
+                            <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('receptionist')}">
+                                <h2 class="card-text-status" th:style="'color:' + ${currentlyBookedRoom.status.color}"
+                                    th:text="${currentlyBookedRoom.status.name}"></h2>
+
+                                <h1 class="card-text-room-no" th:id="${currentlyBookedRoom.id}"
+                                    th:text="${currentlyBookedRoom.roomNo}"
+                                    th:style="'color:' + ${currentlyBookedRoom.status.color} "></h1>
+                            </div>
+                            <div>
+                                <h4><span class="label label-warning">Booked</span></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:unless="${myBookedRooms == null} ">
+                <div th:each="myBookedRoom:${myBookedRooms}" class="col-md-3">
+                    <div class="card clickable" th:rel="${myBookedRoom.id}">
+                        <h4>
+                            <span class="label label-default" th:if="${myBookedRoom.type}=='Normal'"
+                                th:text="${myBookedRoom.type}"></span>
+                            <span class="label label-info" th:if="${myBookedRoom.type}=='Suite'"
+                                th:text="${myBookedRoom.type}"></span>
+                        </h4>
+                        <div style="padding-top: 30px;">
+                            <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('receptionist')}">
+                                <h2 class="card-text-status" th:style="'color:' + ${myBookedRoom.status.color}"
+                                    th:text="${myBookedRoom.status.name}"></h2>
+
+                                <h1 class="card-text-room-no" th:id="${myBookedRoom.id}"
+                                    th:text="${myBookedRoom.roomNo}"
+                                    th:style="'color:' + ${myBookedRoom.status.color} "></h1>
+
+
+                                <div class="div-room-booking-checking">
+                                    <button th:rel="${bookingId}"
+                                        class="btn btn-danger btn-booked-room-cancel">Cancel</button>
+                                    <span th:if="${#dates.format(#dates.createNow(), 'dd MMM yyyy')} eq ${#dates.format(bookingStartDate, 'dd MMM yyyy')}">
+                                        <button th:unless="${myBookedRoom.checked}" class="btn btn-success btn-check-in-room-booking" th:rel="${bookingId}">Check In</button>
+                                    </span>
+                                </div>
+                            </div>
+                            <h4><span class="label label-primary text-booking-status">Booked</span></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:unless="${availableRooms == null} ">
+                <div th:each="availableRoom:${availableRooms}" class="col-md-3">
+                    <div class="card clickable" th:rel="${availableRoom.id}">
+                        <h4>
+                            <span class="label label-default" th:if="${availableRoom.type}=='Normal'" th:text="${availableRoom.type}"></span>
+                            <span class="label label-info" th:if="${availableRoom.type}=='Suite'" th:text="${availableRoom.type}"></span>
+                        </h4>
+                        <div style="padding-top: 30px;">
+                            <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('receptionist')}">
+                                <h2 class="card-text-status" th:style="'color:' + ${availableRoom.status.color}"
+                                    th:text="${availableRoom.status.name}"></h2>
+
+                                <h1 class="card-text-room-no" th:id="${availableRoom.id}" th:text="${availableRoom.roomNo}"
+                                    th:style="'color:' + ${availableRoom.status.color} "></h1>
+                                
+                                
+                                    <div class="div-room-booking-checking">
+                                        <h4 th:if="${availableRoom.checked}"><span class="label label-danger">Checked</span></h4>
+                                        <div th:unless="${availableRoom.checked}">
+                                            <button th:rel="${bookingId}" class="btn btn-primary btn-book-room">Book</button>
+                                            <span th:if="${#dates.format(#dates.createNow(), 'dd MMM yyyy')} eq ${#dates.format(bookingStartDate, 'dd MMM yyyy')}">
+                                                <button th:unless="${availableRoom.checked}" class="btn btn-success btn-check-in-room-booking" th:rel="${bookingId}">Check In</button>
+                                            </span>
+                                            <h4><span class="label label-success text-booking-status">Available</span></h4>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:unless="${checkedRooms == null} ">
+                <div th:each="checkedRoom:${checkedRooms}" class="col-md-3">
+                    <div class="card clickable" th:rel="${checkedRoom.id}">
+                        <h4>
+                            <span class="label label-default" th:if="${checkedRoom.type}=='Normal'" th:text="${checkedRoom.type}"></span>
+                            <span class="label label-info" th:if="${checkedRoom.type}=='Suite'" th:text="${checkedRoom.type}"></span>
+                        </h4>
+                        <div style="padding-top: 30px;">
+                            <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('receptionist')}">
+                                <h2 class="card-text-status" th:style="'color:' + ${checkedRoom.status.color}"
+                                    th:text="${checkedRoom.status.name}"></h2>
+
+                                <h1 class="card-text-room-no" th:id="${checkedRoom.id}" th:text="${checkedRoom.roomNo}"
+                                    th:style="'color:' + ${checkedRoom.status.color} "></h1>
+                            </div>
+                            <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('customer')}">
+                                <h2>Room No</h2>
+                                <h2 class="card-text-room-no" th:id="${checkedRoom.id}" th:text="${checkedRoom.roomNo}"></h2>
+                            </div>
+                            <div>
+                                <h4><span class="label label-danger">Checked</span></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:unless="${bookedRooms == null} ">
+                <div th:each="bookedRoom:${bookedRooms}" class="col-md-3">
+                    <div class="card clickable" th:rel="${bookedRoom.id}">
+                        <h4>
+                            <span class="label label-default" th:if="${bookedRoom.type}=='Normal'" th:text="${bookedRoom.type}"></span>
+                            <span class="label label-info" th:if="${bookedRoom.type}=='Suite'" th:text="${bookedRoom.type}"></span>
+                        </h4>
+                        <div style="padding-top: 30px;">
+                            <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('receptionist')}">
+                                <h2 class="card-text-status" th:style="'color:' + ${bookedRoom.status.color}"
+                                    th:text="${bookedRoom.status.name}"></h2>
+
+                                <h1 class="card-text-room-no" th:id="${bookedRoom.id}" th:text="${bookedRoom.roomNo}"
+                                    th:style="'color:' + ${bookedRoom.status.color} "></h1>
+                            </div>
+                            <div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('customer')}">
+                                <h2>Room No</h2>
+                                <h2 class="card-text-room-no" th:id="${bookedRoom.id}" th:text="${bookedRoom.roomNo}"></h2>
+                            </div>
+                            <div>
+                                <h4><span class="label label-danger">Booked</span></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('manager')}">
+    <div th:replace="rooms/manager/assign-task-dialog"></div>
+    <div th:replace="rooms/manager/room-facility-dialog"></div>
+</div>
+
+<div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('staff')}">
+    <div th:replace="rooms/staff/room-tasks-dialog"></div>
+</div>
+
+<div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('receptionist')}">
+    <div th:replace="rooms/receptionist/direct-checkin-dialog"></div>
+</div>
+
+<div th:replace="shared/footer"></div>
+
+<div th:unless="${T(com.cibt.hms.core.SecuredController).hasRole('customer', 'receptionist')}">
+    <div th:replace="rooms/shared/change-room-status-scripts"></div>
+</div>
+
+<div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('manager')}">
+    <div th:replace="rooms/manager/manager-index-scripts"></div>
+</div>
+
+<div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('staff')}">
+    <div th:replace="rooms/staff/staff-index-scripts"></div>
+</div>
+
+<div th:if="${T(com.cibt.hms.core.SecuredController).hasRole('receptionist')}">
+    <div th:replace="rooms/receptionist/receptionist-index-scripts"></div>
+</div>
